@@ -1,0 +1,34 @@
+package water;
+
+public class WaterTile {
+	
+	private float height;
+	private float x,z;
+	public float size;
+	
+	public WaterTile(float centerX, float centerZ, float size, float height){
+		this.x = centerX;
+		this.z = centerZ;
+		this.size = size;
+		this.height = height;
+	}
+	
+	public void setHeight(float height) {
+		this.height = height;
+	}
+
+	public float getHeight() {
+		return height;
+	}
+
+	public float getX() {
+		return x;
+	}
+
+	public float getZ() {
+		return z;
+	}
+
+
+
+}
