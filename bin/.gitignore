@@ -17,3 +17,12 @@
 /textures/
 /toolbox/
 /water/
+/Animation/
+/ColladaParser/
+/animatedModel/
+/animation/
+/loaders/
+/renderer/
+/colladaLoader/
+/xmlLoader/
+/openglObjects/

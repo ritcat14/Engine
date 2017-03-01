@@ -2,10 +2,7 @@ package engineTester;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Random;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -17,16 +14,13 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
-import models.RawModel;
 import models.TexturedModel;
-import normalMappingObjConverter.NormalMappedObjLoader;
 import objConverter.OBJFileLoader;
 import particles.ParticleMaster;
 import postProcessing.Fbo;
 import postProcessing.PostProcessing;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
-import renderEngine.OBJLoader;
 import terrains.Terrain;
 import textures.ModelTexture;
 import textures.TerrainTexture;
@@ -73,6 +67,7 @@ public class World {
 	}
 	
 	public void init() {
+		
 		multisampleFbo = new Fbo(Display.getWidth(), Display.getHeight());
 		outputFbo = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
 		outputFbo2 = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
@@ -138,7 +133,7 @@ public class World {
 				e.printStackTrace();
 			}
 			
-			player.setPosition(new Vector3f(x, y, z));
+			//player.setPosition(new Vector3f(x, y, z));
 			
 		}
 		
@@ -159,10 +154,11 @@ public class World {
 		ParticleMaster.init(loader, renderer.getProjectionMatrix());
 		PostProcessing.init(loader);
 	}
+	
 	private int i = 0;
 	public void update() {
-		/*i++;
-		water.setHeight(-20 + (i / 5000));*/
+		i++;
+		water.setHeight(-20 + (i / 5000));
 		
 		ParticleMaster.update(camera);
 		player.move(terrain);
