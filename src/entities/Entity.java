@@ -7,9 +7,11 @@ import org.lwjgl.util.vector.Vector3f;
 public class Entity {
 
 	private TexturedModel model;
-	private Vector3f position;
+	protected Vector3f position;
 	private float rotX, rotY, rotZ;
 	private float scale;
+	
+	private boolean removed = false;
 	
 	private int textureIndex = 0;
 
@@ -21,6 +23,7 @@ public class Entity {
 		this.rotY = rotY;
 		this.rotZ = rotZ;
 		this.scale = scale;
+		removed = false;
 	}
 	
 	public Entity(TexturedModel model, int index, Vector3f position, float rotX, float rotY, float rotZ,
@@ -32,6 +35,15 @@ public class Entity {
 		this.rotY = rotY;
 		this.rotZ = rotZ;
 		this.scale = scale;
+		removed = false;
+	}
+	
+	public boolean isRemoved() {
+		return removed;
+	}
+	
+	public void remove() {
+		removed = true;
 	}
 	
 	public float getTextureXOffset(){

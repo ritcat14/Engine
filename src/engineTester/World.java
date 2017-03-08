@@ -46,6 +46,10 @@ public class World {
 	private ArrayList<Entity> normalMapEntities;
 	private ArrayList<Light> lights;
 	
+	private ArrayList<Entity> entitiesToRender;
+	private ArrayList<Entity> normalMapEntitiesToRender;
+	private ArrayList<Light> lightsToRender;
+	
 	private Light sun;
 	private Camera camera;
 	private Player player;
@@ -63,6 +67,9 @@ public class World {
 		entities = new ArrayList<Entity>();
 		normalMapEntities = new ArrayList<Entity>();
 		lights = new ArrayList<Light>();
+		entitiesToRender = new ArrayList<Entity>();
+		normalMapEntitiesToRender = new ArrayList<Entity>();
+		lightsToRender = new ArrayList<Light>();
 		init();
 	}
 	
@@ -140,9 +147,9 @@ public class World {
 		//*******************OTHER SETUP***************
 
 		sun = new Light(new Vector3f(100000, 100000, -100000), new Vector3f(0f, 0f, 0f));
-		lights.add(sun);
+		lightsToRender.add(sun);
 		
-		entities.add(player);
+		entitiesToRender.add(player);
 	
 		//**********Water Renderer Set-up************************
 		
@@ -160,10 +167,12 @@ public class World {
 		i++;
 		water.setHeight(-20 + (i / 5000));
 		
+		checkEntities();
+		
 		ParticleMaster.update(camera);
 		player.move(terrain);
 		camera.move();
-		renderer.renderShadowMap(entities, sun);
+		renderer.renderShadowMap(entitiesToRender, sun);
 		GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
 		
 		//render reflection teture
@@ -171,19 +180,19 @@ public class World {
 		float distance = 2 * (camera.getPosition().y - water.getHeight());
 		camera.getPosition().y -= distance;
 		camera.invertPitch();
-		renderer.renderScene(entities, normalMapEntities, terrain, lights, camera, new Vector4f(0, 1, 0, -water.getHeight()+1));
+		renderer.renderScene(entitiesToRender, normalMapEntitiesToRender, terrain, lightsToRender, camera, new Vector4f(0, 1, 0, -water.getHeight()+1));
 		camera.getPosition().y += distance;
 		camera.invertPitch();
 		
 		//render refraction texture
 		buffers.bindRefractionFrameBuffer();
-		renderer.renderScene(entities, normalMapEntities, terrain, lights, camera, new Vector4f(0, -1, 0, water.getHeight()));
+		renderer.renderScene(entitiesToRender, normalMapEntitiesToRender, terrain, lightsToRender, camera, new Vector4f(0, -1, 0, water.getHeight()));
 		
 		//render to screen
 		GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
 		buffers.unbindCurrentFrameBuffer();	
 		multisampleFbo.bindFrameBuffer();
-		renderer.renderScene(entities, normalMapEntities, terrain, lights, camera, new Vector4f(0, -1, 0, 100000));	
+		renderer.renderScene(entitiesToRender, normalMapEntitiesToRender, terrain, lightsToRender, camera, new Vector4f(0, -1, 0, 100000));	
 		waterRenderer.render(water, camera, sun);
 		ParticleMaster.renderParticles(camera);
 		multisampleFbo.unbindFrameBuffer();
@@ -192,6 +201,52 @@ public class World {
 		PostProcessing.doPostProcessing(outputFbo.getColourTexture(), outputFbo2.getColourTexture());
 	}
 	
+	private void checkEntities() {
+		ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
+		for (Entity e : entities) {
+			if (e instanceof Player) continue;
+			if (e.isRemoved()) {
+				entitiesToRemove.add(e);
+				continue;
+			}
+			boolean inBounds = player.inBounds(e.getPosition().x, e.getPosition().z);
+			if (inBounds) {
+				if (!entitiesToRender.contains(e)) entitiesToRender.add(e);
+			} else {
+				if (entitiesToRender.contains(e)) entitiesToRender.remove(e);
+			}
+		}
+		entities.removeAll(entitiesToRemove);
+		
+		ArrayList<Entity> normalMapEntitiesToRemove = new ArrayList<Entity>();
+		for (Entity e : normalMapEntities) {
+			if (e instanceof Player) continue;
+			if (e.isRemoved()) {
+				normalMapEntitiesToRemove.add(e);
+				continue;
+			}
+			boolean inBounds = player.inBounds(e.getPosition().x, e.getPosition().z);
+			if (inBounds) {
+				if (!normalMapEntitiesToRender.contains(e)) normalMapEntitiesToRender.add(e);
+			} else {
+				if (normalMapEntitiesToRender.contains(e)) normalMapEntitiesToRender.remove(e);
+			}
+		}
+		normalMapEntities.removeAll(normalMapEntitiesToRemove);
+		
+		ArrayList<Light> lightsToRemove = new ArrayList<Light>();
+		for (Light l : lights) {
+			if (l.equals(sun)) continue;
+			boolean inBounds = player.inBounds(l.getPosition().x, l.getPosition().z);
+			if (inBounds) {
+				if (!lightsToRender.contains(l)) lightsToRender.add(l);
+			} else {
+				if (lightsToRender.contains(l)) lightsToRender.remove(l);
+			}
+		}
+		lights.removeAll(lightsToRemove);
+	}
+
 	public void cleanUp() {
 		PostProcessing.cleanUp();
 		outputFbo.cleanUp();

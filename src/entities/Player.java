@@ -42,6 +42,18 @@ public class Player extends Entity {
 			super.getPosition().y = terrainHeight;
 		}
 	}
+	
+	public boolean inBounds(float x, float z) {
+		int boundaries = 500;
+		int x0 = (int) (position.x - boundaries);
+		int x1 = (int) (position.x + boundaries);
+		int z0 = (int) (position.z - boundaries);
+		int z1 = (int) (position.z + boundaries);
+		int eX = (int) x;
+		int eZ = (int) z;
+		
+		return (eX > x0 && eX < x1 && eZ > z0 && eZ < z1);
+	}
 
 	private void jump() {
 		if (!isInAir) {
