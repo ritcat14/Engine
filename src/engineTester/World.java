@@ -3,6 +3,7 @@ package engineTester;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -15,6 +16,7 @@ import entities.Entity;
 import entities.Light;
 import entities.Player;
 import models.TexturedModel;
+import normalMappingObjConverter.NormalMappedObjLoader;
 import objConverter.OBJFileLoader;
 import particles.ParticleMaster;
 import postProcessing.Fbo;
@@ -90,6 +92,8 @@ public class World {
 				gTexture, bTexture);
 		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blendMap"));
 
+		terrain = new Terrain(0, -1, loader, texturePack, blendMap, "heightmap");
+
 		// *****************************************
 		
 		String[] entityData = null;
@@ -100,8 +104,6 @@ public class World {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		terrain = new Terrain(0, -1, loader, texturePack, blendMap, "heightmap");
 		
 		float x = 735;
 		float z = -485;
@@ -139,9 +141,6 @@ public class World {
 				System.out.println(s);
 				e.printStackTrace();
 			}
-			
-			//player.setPosition(new Vector3f(x, y, z));
-			
 		}
 		
 		//*******************OTHER SETUP***************
@@ -157,6 +156,24 @@ public class World {
 		waterShader = new WaterShader();
 		waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(), buffers);
 		water = new WaterTile(Terrain.SIZE, -Terrain.SIZE, Terrain.SIZE, -20);
+		
+		TexturedModel tree1 = new TexturedModel(OBJFileLoader.loadOBJ("tree", loader), new ModelTexture(loader.loadTexture("texture")));
+		
+		Random random = new Random(5666778);
+		float waterHeight = water.getHeight();
+		for (int i = 0; i < Terrain.SIZE/5; i++) {
+			if (i % 3 == 0) {
+				x = (random.nextFloat() * Terrain.SIZE);
+				z = (random.nextFloat() * -Terrain.SIZE);
+				if ((x > 50 && x < 100) || (z < -50 && z > -100)) {
+				} else {
+					y = terrain.getHeightOfTerrain(x, z);
+					if (y < waterHeight) continue;
+					entities.add(new Entity(tree1, 3, new Vector3f(x, y, z), 0,
+							random.nextFloat() * 360, 0, 10f));
+				}
+			}
+		}
 		
 		ParticleMaster.init(loader, renderer.getProjectionMatrix());
 		PostProcessing.init(loader);
