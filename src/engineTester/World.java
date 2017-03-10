@@ -1,13 +1,16 @@
 package engineTester;
 
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -15,6 +18,10 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import guis.GuiButton;
+import guis.GuiComponent;
+import guis.GuiPanel;
+import guis.GuiRenderer;
 import models.TexturedModel;
 import normalMappingObjConverter.NormalMappedObjLoader;
 import objConverter.OBJFileLoader;
@@ -52,12 +59,15 @@ public class World {
 	private ArrayList<Entity> normalMapEntitiesToRender;
 	private ArrayList<Light> lightsToRender;
 	
+	private ArrayList<GuiComponent> components;
+	
 	private Light sun;
 	private Camera camera;
 	private Player player;
 	private Terrain terrain;
 	private WaterTile water;
 	private WaterShader waterShader;
+	private GuiRenderer guiRenderer;
 	private WaterFrameBuffers buffers;
 	private WaterRenderer waterRenderer;
 	
@@ -72,10 +82,13 @@ public class World {
 		entitiesToRender = new ArrayList<Entity>();
 		normalMapEntitiesToRender = new ArrayList<Entity>();
 		lightsToRender = new ArrayList<Light>();
+		components = new ArrayList<GuiComponent>();
 		init();
 	}
 	
 	public void init() {
+		
+		guiRenderer = new GuiRenderer(loader);
 		
 		multisampleFbo = new Fbo(Display.getWidth(), Display.getHeight());
 		outputFbo = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
@@ -177,6 +190,35 @@ public class World {
 		
 		ParticleMaster.init(loader, renderer.getProjectionMatrix());
 		PostProcessing.init(loader);
+		Vector2f size = new Vector2f(0.04f, 2f);
+		components.add(new GuiPanel(loader, "test", new Vector2f(size.x - 1, 1 - size.y), size));
+		size = new Vector2f(1.92f, 0.04f);
+		components.add(new GuiPanel(loader, "test", new Vector2f((size.x - 1) + 0.08f, (1 - size.y)), size));
+		size = getScaledVector(0.08f);
+		components.add(new GuiPanel(loader, "testCorner", new Vector2f((size.x - 1) + 0.08f, (1 - size.y) - 0.08f), size));
+		components.add(new GuiButton(loader, "inventory", new Vector2f(0,0), new Vector2f(0.1f, 0.1f)) {
+			@Override
+			public void onMousePressed() {
+				float xPos = ((0.02f) * ((Mouse.getX() * 100) / Display.getWidth())) - 1;
+				float zPos = 1 - ((0.02f) * ((Mouse.getY() * 100) / Display.getHeight()));
+				if (Mouse.isButtonDown(0) && inBounds(xPos, zPos, position.x, position.y, size.x, size.y)) {
+					System.out.println("Inventory pressed");
+				}
+			}
+		});
+		checkLists();
+	}
+	
+	private boolean inBounds(float x0, float y0, float x1, float y1, float sizeX, float sizeY) {
+		return (x0 > (x1 - sizeX) && x0 < (x1 + sizeX) && y0 > (y1 - sizeY) && y0 < (y1 + sizeY));
+	}
+	
+	private Vector2f getScaledVector(float width) {
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		int aspectX = tk.getScreenSize().width / 100;
+		int aspectY = tk.getScreenSize().height / 100;
+		float height = (width / aspectY) * aspectX;
+		return new Vector2f(width, height);
 	}
 	
 	private int i = 0;
@@ -184,7 +226,7 @@ public class World {
 		i++;
 		water.setHeight(-20 + (i / 5000));
 		
-		checkEntities();
+		if (player.isMoving()) checkLists();
 		
 		ParticleMaster.update(camera);
 		player.move(terrain);
@@ -216,9 +258,16 @@ public class World {
 		multisampleFbo.resolveToFbo(GL30.GL_COLOR_ATTACHMENT0, outputFbo);
 		multisampleFbo.resolveToFbo(GL30.GL_COLOR_ATTACHMENT1, outputFbo2);
 		PostProcessing.doPostProcessing(outputFbo.getColourTexture(), outputFbo2.getColourTexture());
+
+		ArrayList<GuiComponent> componentsToRemove = new ArrayList<GuiComponent>();
+		for (GuiComponent c : components) {
+			if (c.isRemoved()) componentsToRemove.add(c);
+		}
+		components.removeAll(componentsToRemove);
+		for (GuiComponent c : components) c.render(guiRenderer);
 	}
 	
-	private void checkEntities() {
+	private void checkLists() {
 		ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
 		for (Entity e : entities) {
 			if (e instanceof Player) continue;
@@ -272,6 +321,7 @@ public class World {
 		ParticleMaster.cleanUp();
 		buffers.cleanUp();
 		waterShader.cleanUp();
+		guiRenderer.cleanUp();
 	}
 	
 }

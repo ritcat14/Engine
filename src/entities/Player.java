@@ -19,6 +19,8 @@ public class Player extends Entity {
 	private float currentTurnSpeed = 0;
 	private float upwardsSpeed = 0;
 
+	private boolean moving = false;
+	
 	private boolean isInAir = false;
 
 	public Player(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ,
@@ -61,14 +63,21 @@ public class Player extends Entity {
 			isInAir = true;
 		}
 	}
+	
+	public boolean isMoving() {
+		return moving;
+	}
 
 	private void checkInputs() {
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
 			this.currentSpeed = RUN_SPEED;
+			moving = true;
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
 			this.currentSpeed = -RUN_SPEED;
+			moving = true;
 		} else {
 			this.currentSpeed = 0;
+			moving = false;
 		}
 
 		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
