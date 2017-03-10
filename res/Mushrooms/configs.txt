@@ -1,0 +1,3 @@
+hasExtraMap;FALSE
+hasTransparency;FALSE
+hasReflection;FLASE
