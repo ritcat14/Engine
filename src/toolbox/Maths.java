@@ -1,5 +1,8 @@
 package toolbox;
 
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
@@ -49,6 +52,18 @@ public class Maths {
 		return viewMatrix;
 	}
 	
+	public static Vector2f convertToJavaSize(Vector2f size) {
+		int jWidth = (int) (0.02f / ((size.x / 100) * Display.getWidth()));
+		int jHeight = (int) (0.02f / ((size.y / 100) * Display.getHeight()));
+		return new Vector2f(jWidth * 2, jHeight * 2);
+	}
+	
+	public static Vector2f convertToJavaCoordinates(Vector2f position, Vector2f size) {
+		int xPos = (int) ((((0.02f) / ((position.x / 100) * Display.getWidth())) + 1) - size.x);
+		int yPos = (int) ((((0.02f) / ((position.y / 100) * Display.getHeight())) + 1) - size.y);
+		return new Vector2f(xPos, yPos);
+	}
+	
 	public static Vector2f convertToOpenGLSize(int width, int height) {
 		float glWidth = 0.02f * ((width * 100) / Display.getWidth());
 		float glHeight = 0.02f * ((height * 100) / Display.getHeight());
@@ -59,6 +74,19 @@ public class Maths {
 		float xPos = (((0.02f) * ((x * 100) / Display.getWidth())) - 1) + xOffset;
 		float yPos = (1 - ((0.02f) * ((y * 100) / Display.getHeight()))) - yOffset;
 		return new Vector2f(xPos, yPos);
+	}
+	
+	public static boolean inBounds(int pointX, int pointY, Vector2f position, Vector2f size) {
+		Rectangle r = new Rectangle((int)position.x, (int)position.y, (int)size.x, (int)size.y);
+		return (r.contains(pointX, pointY));
+	}
+	
+	public static Vector2f getScaledVector(float width) {
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		int aspectX = tk.getScreenSize().width / 100;
+		int aspectY = tk.getScreenSize().height / 100;
+		float height = (width / aspectY) * aspectX;
+		return new Vector2f(width, height);
 	}
 
 }

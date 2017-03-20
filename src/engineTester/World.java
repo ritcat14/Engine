@@ -1,5 +1,6 @@
 package engineTester;
 
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -168,7 +169,7 @@ public class World {
 		waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(), buffers);
 		water = new WaterTile(Terrain.SIZE, -Terrain.SIZE, Terrain.SIZE, -20);
 		
-		TexturedModel tree1 = new TexturedModel(OBJFileLoader.loadOBJ("tree", loader), new ModelTexture(loader.loadTexture("texture")));
+		/*TexturedModel tree1 = new TexturedModel(OBJFileLoader.loadOBJ("tree", loader), new ModelTexture(loader.loadTexture("texture")));
 		
 		Random random = new Random(5666778);
 		float waterHeight = water.getHeight();
@@ -183,7 +184,7 @@ public class World {
 							random.nextFloat() * 360, 0, 10f));
 				}
 			}
-		}
+		}*/
 		
 		ParticleMaster.init(loader, renderer.getProjectionMatrix());
 		PostProcessing.init(loader);
@@ -194,31 +195,19 @@ public class World {
 		components.add(new GuiPanel(loader, "test", Maths.convertToOpenGLCoordinates(0, 0, size.x, size.y), size));
 		size = Maths.convertToOpenGLSize(Display.getWidth() - 90, 90);
 		components.add(new GuiPanel(loader, "test", Maths.convertToOpenGLCoordinates(90, 0, size.x, size.y), size));
-		/*main.add(new GuiPanel(loader, "testCorner", new Vector2f(0.08f, -0.08f), size));
-		main.add(new GuiButton(loader, "inventory", new Vector2f(0,0), new Vector2f(0.1f, 0.1f)) {
+		size = Maths.convertToOpenGLSize(200, 200);
+		components.add(new GuiPanel(loader, "testCorner", Maths.convertToOpenGLCoordinates(90, 90, size.x, size.y), size));
+		size = Maths.convertToOpenGLSize(200, 50);
+		Vector2f position = Maths.convertToOpenGLCoordinates((Display.getWidth() / 2) - 100, (Display.getHeight() / 2) - 25, size.x, size.y);
+		components.add(new GuiButton(loader, "inventory", position, size) {
 			@Override
 			public void onMousePressed() {
-				float xPos = ((0.02f) * ((Mouse.getX() * 100) / Display.getWidth())) - 1;
-				float zPos = 1 - ((0.02f) * ((Mouse.getY() * 100) / Display.getHeight()));
-				if (Mouse.isButtonDown(0) && inBounds(xPos, zPos, getPosition().x, getPosition().y, getSize().x, getSize().y)) {
-					System.out.println("Inventory pressed");
+				if (Mouse.isButtonDown(0) && Maths.inBounds(Mouse.getX(), Mouse.getY(), Maths.convertToJavaCoordinates(position, this.getSize()), Maths.convertToJavaSize(this.getSize()))) {
+					System.exit(-1);
 				}
 			}
 		});
-		components.add(main);*/
 		checkLists();
-	}
-	
-	private boolean inBounds(float x0, float y0, float x1, float y1, float sizeX, float sizeY) {
-		return (x0 > (x1 - sizeX) && x0 < (x1 + sizeX) && y0 > (y1 - sizeY) && y0 < (y1 + sizeY));
-	}
-	
-	private Vector2f getScaledVector(float width) {
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		int aspectX = tk.getScreenSize().width / 100;
-		int aspectY = tk.getScreenSize().height / 100;
-		float height = (width / aspectY) * aspectX;
-		return new Vector2f(width, height);
 	}
 	
 	private int i = 0;
