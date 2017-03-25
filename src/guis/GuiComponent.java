@@ -9,14 +9,11 @@ import renderEngine.Loader;
 public abstract class GuiComponent {
 	
 	protected ArrayList<GuiComponent> components = new ArrayList<GuiComponent>();
-	protected Vector2f position, size;
 	protected GuiTexture texture;
 	protected boolean removed = false;
 	
 	public GuiComponent(Loader loader, String texture, Vector2f position, Vector2f size) {
 		this.texture = new GuiTexture(loader.loadTexture(texture), position, size);
-		this.position = position;
-		this.size = size;
 	}
 	
 	public void remove() {
@@ -27,8 +24,14 @@ public abstract class GuiComponent {
 		return removed;
 	}
 	
-	public void add(GuiComponent c) {
+	public void add(GuiComponent c) { // NOTE: Adding a component to another component is position relative!
+		float cX = c.getPosition().x;
+		float cY = c.getPosition().y;
+		float tX = this.getPosition().x - this.getSize().x;
+		float tY = this.getPosition().y - this.getSize().y;
+		c.setPosition(new Vector2f(tX + cX, tY - cY));
 		components.add(c);
+		System.out.println(c.getPosition().x + ":" + c.getPosition().y);
 	}
 	
 	public void remove(GuiComponent c) {
@@ -36,19 +39,19 @@ public abstract class GuiComponent {
 	}
 	
 	public Vector2f getPosition() {
-		return position;
+		return texture.getPosition();
 	}
 	
 	public Vector2f getSize() {
-		return size;
+		return texture.getScale();
 	}
 	
 	public void setPosition(Vector2f position) {
-		this.position = position;
+		texture.setPosition(position);
 	}
 	
 	public void setSize(Vector2f size) {
-		this.size = size;
+		texture.setScale(size);
 	}
 	
 	public GuiTexture getTexture() {
