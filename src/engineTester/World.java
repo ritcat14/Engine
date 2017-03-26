@@ -1,17 +1,12 @@
 package engineTester;
 
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Random;
 
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -19,9 +14,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
-import guis.GuiButton;
 import guis.GuiComponent;
-import guis.GuiPanel;
 import guis.GuiRenderer;
 import models.TexturedModel;
 import objConverter.OBJFileLoader;
@@ -36,7 +29,6 @@ import terrains.Terrain;
 import textures.ModelTexture;
 import textures.TerrainTexture;
 import textures.TerrainTexturePack;
-import toolbox.Maths;
 import water.WaterFrameBuffers;
 import water.WaterRenderer;
 import water.WaterShader;
