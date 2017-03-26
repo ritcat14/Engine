@@ -26,6 +26,8 @@ import guis.GuiRenderer;
 import models.TexturedModel;
 import objConverter.OBJFileLoader;
 import particles.ParticleMaster;
+import particles.ParticleSystem;
+import particles.ParticleTexture;
 import postProcessing.Fbo;
 import postProcessing.PostProcessing;
 import renderEngine.Loader;
@@ -44,21 +46,21 @@ public class World {
 	
 	private Loader loader;
 	private MasterRenderer renderer;
-	
-	private Fbo multisampleFbo;
+
 	private Fbo outputFbo;
 	private Fbo outputFbo2;
-	
+	private Fbo multisampleFbo;
+
 	public static final float gradient = 5.0f;
 	public static final float density = 0.003f;
-	
+
+	private ArrayList<Light> lights;
 	private ArrayList<Entity> entities;
 	private ArrayList<Entity> normalMapEntities;
-	private ArrayList<Light> lights;
-	
+
+	private ArrayList<Light> lightsToRender;
 	private ArrayList<Entity> entitiesToRender;
 	private ArrayList<Entity> normalMapEntitiesToRender;
-	private ArrayList<Light> lightsToRender;
 	
 	private ArrayList<GuiComponent> components;
 	
@@ -67,6 +69,7 @@ public class World {
 	private Player player;
 	private Terrain terrain;
 	private WaterTile water;
+	private ParticleSystem system;
 	private WaterShader waterShader;
 	private GuiRenderer guiRenderer;
 	private WaterFrameBuffers buffers;
@@ -188,7 +191,7 @@ public class World {
 		
 		ParticleMaster.init(loader, renderer.getProjectionMatrix());
 		PostProcessing.init(loader);
-		Vector2f size =  Maths.convertToOpenGLSize(Display.getWidth(), Display.getHeight());
+		/*Vector2f size =  Maths.convertToOpenGLSize(Display.getWidth(), Display.getHeight());
 		//GuiPanel main = new GuiPanel(loader, "blank", new Vector2f(0,0), size);
 		
 		size = Maths.convertToOpenGLSize(90, Display.getHeight());
@@ -206,18 +209,29 @@ public class World {
 					System.exit(-1);
 				}
 			}
-		});
+		});*/
+		
+		system = new ParticleSystem(new ParticleTexture(loader.loadTexture("smoke"), 8, false), 200, 3f, 0.01f, 110, 25f);
+		system.randomizeRotation();
+		system.setDirection(new Vector3f(0, 1, 0), 0.5f);
+		system.setSpeedError(-0.01f);
+		system.setLifeError(0.1f);
+		
 		checkLists();
 	}
 	
 	private int i = 0;
 	public void update() {
+		float x = 735;
+		float z = -485;
+		float y = 200;
+		system.generateParticles(new Vector3f(x, y, z), true);
 		i++;
 		water.setHeight(-20 + (i / 5000));
 		
 		if (player.isMoving()) checkLists();
-		
-		ParticleMaster.update(camera);
+
+		ParticleMaster.update(camera, terrain);
 		player.move(terrain);
 		camera.move();
 		renderer.renderShadowMap(entitiesToRender, sun);

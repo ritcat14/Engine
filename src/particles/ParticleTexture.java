@@ -3,14 +3,13 @@ package particles;
 public class ParticleTexture {
 	
 	private int textureID;
-	private int numberOfRows;
-	
+	private int numberOFRows;
 	private boolean additive;
 	
-	public ParticleTexture(int textureID, int numberOfRows, boolean additive) {
+	public ParticleTexture(int textureID, int numberOFRows, boolean additive) {
 		this.additive = additive;
 		this.textureID = textureID;
-		this.numberOfRows = numberOfRows;
+		this.numberOFRows = numberOFRows;
 	}
 	
 	public boolean isAdditive() {
@@ -21,8 +20,8 @@ public class ParticleTexture {
 		return textureID;
 	}
 	
-	public int getNumberOfRows() {
-		return numberOfRows;
+	public int getNumberOFRows() {
+		return numberOFRows;
 	}
-	
+
 }
